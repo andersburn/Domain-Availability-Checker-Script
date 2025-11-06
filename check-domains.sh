@@ -22,7 +22,8 @@ check_domain() {
 	#	result=$(whois -h whois.punktum.dk "$domain" 2>/dev/null)
 
 
-    if echo "$result" | grep -qiE "No entries found for the selected source|Domain not found|No match for domain|No match for|NOT FOUND"; then
+    #if echo "$result" | grep -qiE "No entries found for the selected source|Domain not found|No match for domain|No match for|NOT FOUND"; then
+	if echo "$result" | grep -Eiq "No (entries|match)|Domain not found"; then
 		echo "[FREE]  $domain"
 		echo "$domain" >> "$output_free"
 	else
