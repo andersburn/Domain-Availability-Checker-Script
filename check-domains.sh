@@ -1,39 +1,57 @@
 #!/bin/bash
 
-# Check available .dk domains with 1, 2, or 3 characters (letters/numbers)
+######################################
+# CONFIGURATION
+######################################
+DOMAIN_ENDING=".dk"       # Domain extension (e.g., .dk)
+SLEEP_TIME=1              # Seconds to wait between WHOIS lookups
+MIN_LENGTH=1              # Minimum domain length
+MAX_LENGTH=3              # Maximum domain length
+######################################
 
 letters=({a..z} {0..9})
-output_free="free_domains.txt"
-output_taken="taken_domains.txt"
+output_free="free_domains_${MIN_LENGTH}-${MAX_LENGTH}char.txt"
+output_taken="taken_domains_${MIN_LENGTH}-${MAX_LENGTH}char.txt"
 
 > "$output_free"
 > "$output_taken"
 
 check_domain() {
-	domain="$1.dk"
-	if whois "$domain" | grep -q "No entries found"; then
-		echo "$domain" | tee -a "$output_free"
+	domain="$1$DOMAIN_ENDING"
+	result=$(whois -h whois.punktum.dk "$domain" 2>/dev/null)
+
+	if echo "$result" | grep -q "No entries found for the selected source."; then
+		echo "[FREE]  $domain"
+		echo "$domain" >> "$output_free"
 	else
-		echo "$domain" | tee -a "$output_taken"
+		echo "[TAKEN] $domain"
+		echo "$domain" >> "$output_taken"
 	fi
+
+	sleep "$SLEEP_TIME"
 }
 
-for a in "${letters[@]}"; do
-	check_domain "$a"
-done
-
-for a in "${letters[@]}"; do
-	for b in "${letters[@]}"; do
-		check_domain "$a$b"
+generate_domains() {
+	for ((len=MIN_LENGTH; len<=MAX_LENGTH; len++)); do
+		echo "Checking $len-character domains..."
+		generate_combinations "" $len
 	done
-done
+}
 
-for a in "${letters[@]}"; do
-	for b in "${letters[@]}"; do
-		for c in "${letters[@]}"; do
-			check_domain "$a$b$c"
-		done
+generate_combinations() {
+	local prefix=$1
+	local remaining=$2
+
+	if (( remaining == 0 )); then
+		check_domain "$prefix"
+		return
+	fi
+
+	for ch in "${letters[@]}"; do
+		generate_combinations "$prefix$ch" $((remaining - 1))
 	done
-done
+}
+
+generate_domains
 
 echo "Done. Free domains saved in $output_free, taken domains in $output_taken."
