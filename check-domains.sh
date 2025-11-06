@@ -3,7 +3,7 @@
 ######################################
 # CONFIGURATION
 ######################################
-DOMAIN_ENDING=".dk"       # Domain extension (e.g., .dk)
+DOMAIN_ENDING=".com"       # Domain extension (e.g., .dk)
 SLEEP_TIME=1              # Seconds to wait between WHOIS lookups
 MIN_LENGTH=1              # Minimum domain length
 MAX_LENGTH=3              # Maximum domain length
@@ -18,7 +18,9 @@ output_taken="taken_domains_${MIN_LENGTH}-${MAX_LENGTH}char.txt"
 
 check_domain() {
 	domain="$1$DOMAIN_ENDING"
-	result=$(whois -h whois.punktum.dk "$domain" 2>/dev/null)
+	result=$(whois "$domain" 2>/dev/null)
+	#	result=$(whois -h whois.punktum.dk "$domain" 2>/dev/null)
+
 
 	if echo "$result" | grep -q "No entries found for the selected source."; then
 		echo "[FREE]  $domain"
