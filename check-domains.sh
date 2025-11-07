@@ -4,7 +4,7 @@
 # CONFIGURATION
 ######################################
 DOMAIN_ENDING=".ai"       # Domain extension (e.g., .dk, .com, .net, .ai)
-SLEEP_TIME=0.1              # Seconds to wait between WHOIS lookups
+SLEEP_TIME=1              # Seconds to wait between WHOIS lookups
 MIN_LENGTH=1              # Minimum domain length
 MAX_LENGTH=2              # Maximum domain length
 ######################################
@@ -29,7 +29,7 @@ check_domain() {
 	# If no DNS, fallback to WHOIS
 	result=$(whois "$domain" 2>/dev/null)
 
-	if echo "$result" | grep -qiE "No entries found for the selected source|Domain not found|No match for domain|No match for|NOT FOUND"; then
+	if echo "$result" | grep -qiE "No entries found for the selected source|No entries|No match|Domain not found|No match for domain|No match for"; then
 		echo "[FREE]  $domain"
 		echo "$domain" >> "$output_free"
 	else
@@ -37,7 +37,9 @@ check_domain() {
 		echo "$domain" >> "$output_taken"
 	fi
 
-	sleep "$SLEEP_TIME"
+	if [ "$used_whois" = true ]; then
+		sleep "$SLEEP_TIME"
+	fi
 }
 
 generate_domains() {
