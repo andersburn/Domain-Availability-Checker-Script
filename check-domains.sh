@@ -37,9 +37,8 @@ check_domain() {
 		echo "$domain" >> "$output_taken"
 	fi
 
-	if [ "$used_whois" = true ]; then
 		sleep "$SLEEP_TIME"
-	fi
+	
 }
 
 generate_domains() {
